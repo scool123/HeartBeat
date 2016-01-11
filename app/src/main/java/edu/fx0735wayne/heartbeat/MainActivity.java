@@ -22,6 +22,7 @@ public class MainActivity extends AppCompatActivity
 
 //test github
 //    static Thread recordThread;
+//    static Thread recordThread;
 
     private NavigationDrawerFragment mNavigationDrawerFragment;
 
