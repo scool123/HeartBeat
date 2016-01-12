@@ -146,6 +146,10 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void run(){
             int i = 0;
+            int j = 0;
+            int[] beat={0,0,0,0,0};//1s内有5个时间间隔,beat用来记录时间间隔内是否有心跳,有心跳值为1,没有为0
+            int beatVol=34;//阀值
+            int hartRate;
             isprinting =true;
             while (isprinting){
                 try{
@@ -155,11 +159,30 @@ public class MainActivity extends AppCompatActivity
                     e.printStackTrace();
                 }
                 while(i<COUNT){
-                    Log.i("测试-" , "分贝值:" + data.x[i]);
-                    Log.d("测试-" , "分贝值:" + data.x[i]);
+                    //Log.i("测试-", "分贝值:" + data.x[i]);
+                    //Log.d("测试-" , "分贝值:" + data.x[i]);
+                    if(data.x[i]>beatVol) {//大于阀值时对应间隔的beat值为1
+                        beat[i / 10] = 1;
+                    }
                     i++;
                 }
-
+                //间隔0.2秒即10个样本一个间隔判断其中数值与阈值的大小,大于阈值此0.2秒内有一个心跳,小于阈值此0.2s内没有心跳
+                int count=0;
+                int gap;
+                while(j<5){
+                    if(beat[j]==1){
+                        if(count==0){
+                            gap=j;
+                        }
+                        gap=j-count;
+                        count=j;
+                        if(gap>1){
+                            hartRate=300/(gap-1);
+                            Log.d("测试-", "心率:" + hartRate);
+                            //Log.d("测试-" , "分贝值:" + data.x[i]);
+                        }
+                    }
+                }
             }
         }
     }
