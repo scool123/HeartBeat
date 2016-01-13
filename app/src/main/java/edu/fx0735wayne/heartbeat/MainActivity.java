@@ -5,6 +5,9 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.widget.TextView;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -35,6 +38,14 @@ public class MainActivity extends AppCompatActivity
     static String FileName = null;
     //    static double[] x = new double[50];
 //    static TextView result;
+    /*
+     * 2016/1/14
+     */
+    //显示控件
+    static TextView result;
+    static Handler handler;
+
+
     private static boolean isprinting;
     private static final int COUNT = 50;
     public static Data data;
@@ -59,6 +70,22 @@ public class MainActivity extends AppCompatActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+        /*
+         *2016/1/14 add TextView
+         */
+        result = (TextView)rootView.findViewById(R.id.resultView);
+        result.setText("On starting...");
+        handler= new Handler(){
+            public void handleMessage(Message msg) {
+                switch(msg.what){
+                    case 0:
+                    Bundle b = msg.getData();
+                    String str = b.getString("msg");//获取Bundle对象
+                    result.setText(str);
+                        break;
+                }
+            };
+        };
 
         //创建data实例，开启显示线程
         data = new Data();
@@ -180,11 +207,24 @@ public class MainActivity extends AppCompatActivity
                         if(gap>1){
                             hartRate=300/(gap-1);
                             Log.d("测试-", "心率:" + hartRate);
+        /*
+         *2016/1/14 add TextView
+         */
+                            String msg="心率:" + hartRate;
+                            Bundle bd=new Bundle();//创建Bundle对象
+                            bd.putString("msg", msg);//向Bundle添加数据
+                            Message message=new Message();//创建Message对象
+                            message.setData(bd);//向Message中添加数据
+                            message.what=0;
+                            handler.sendMessage(message);//调用主控制类中的Handler对象发送消息
+
+                            
                             //Log.d("测试-" , "分贝值:" + data.x[i]);
                         }
                     }
                 }
             }
+            result
         }
     }
 
