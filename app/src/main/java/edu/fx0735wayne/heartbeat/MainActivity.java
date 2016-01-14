@@ -5,10 +5,9 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.widget.TextView;
-import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
@@ -19,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -70,22 +70,6 @@ public class MainActivity extends AppCompatActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
-        /*
-         *2016/1/14 add TextView
-         */
-        result = (TextView)rootView.findViewById(R.id.resultView);
-        result.setText("On starting...");
-        handler= new Handler(){
-            public void handleMessage(Message msg) {
-                switch(msg.what){
-                    case 0:
-                    Bundle b = msg.getData();
-                    String str = b.getString("msg");//获取Bundle对象
-                    result.setText(str);
-                        break;
-                }
-            };
-        };
 
         //创建data实例，开启显示线程
         data = new Data();
@@ -142,7 +126,7 @@ public class MainActivity extends AppCompatActivity
                         // 平方和除以数据总长度，得到音量大小。
                         double mean = v / (double) r;
                         double volume = 10 * Math.log10(mean);
-                        Log.d(TAG, "分贝值:" + volume);
+                        Log.d(TAG, "thread分贝值:" + volume);
                         res[j] = volume;
                         j++;
                         if(j>=COUNT){
@@ -173,6 +157,7 @@ public class MainActivity extends AppCompatActivity
     static public class Print extends Thread{
         @Override
         public void run(){
+            System.out.println("enter into print run");
             int i = 0;
             int j = 0;
             int[] beat={0,0,0,0,0};//1s内有5个时间间隔,beat用来记录时间间隔内是否有心跳,有心跳值为1,没有为0
@@ -188,10 +173,12 @@ public class MainActivity extends AppCompatActivity
                 }
                 while(i<COUNT){
                     //Log.i("测试-", "分贝值:" + data.x[i]);
-                    //Log.d("测试-" , "分贝值:" + data.x[i]);
+                    Log.d("print测试-" , "分贝值:" + data.x[i]);
                     if(data.x[i]>beatVol) {//大于阀值时对应间隔的beat值为1
                         beat[i / 10] = 1;
+                        Log.d("print测试-" , "is beat:" + beat[i/10]);
                     }
+                    Log.d("print测试-" , "is beat:" + beat[i/10]);
                     i++;
                 }
                 //间隔0.2秒即10个样本一个间隔判断其中数值与阈值的大小,大于阈值此0.2秒内有一个心跳,小于阈值此0.2s内没有心跳
@@ -204,6 +191,7 @@ public class MainActivity extends AppCompatActivity
                         }
                         gap=j-count;
                         count=j;
+                        Log.d("测试-", "心率count:" + count);
                         if(gap>1){
                             hartRate=300/(gap-1);
                             Log.d("测试-", "心率:" + hartRate);
@@ -222,9 +210,10 @@ public class MainActivity extends AppCompatActivity
                             //Log.d("测试-" , "分贝值:" + data.x[i]);
                         }
                     }
+                    j++;
                 }
             }
-            result
+            //result
         }
     }
 
@@ -390,6 +379,23 @@ public class MainActivity extends AppCompatActivity
 
             //界面控件
 //            TextView result;
+            /*
+         *2016/1/14 add TextView
+         */
+        result = (TextView)rootView.findViewById(R.id.resultView);
+        result.setText("On starting...");
+        handler= new Handler(){
+            public void handleMessage(Message msg) {
+                switch(msg.what){
+                    case 0:
+                    Bundle b = msg.getData();
+                    String str = b.getString("msg");//获取Bundle对象
+                    Log.d("textView测试-" , "心率:" + str);
+                    result.setText(str);
+                        break;
+                }
+            }
+        };
             Button startRecord;
             Button startPlay;
             Button stopRecord;
