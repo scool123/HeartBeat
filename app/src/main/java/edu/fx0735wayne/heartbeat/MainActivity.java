@@ -230,7 +230,10 @@ public class MainActivity extends AppCompatActivity
                 message.setData(bd);//向Message中添加数据
                 message.what=0;
                 handler.sendMessage(message);//调用主控制类中的Handler对象发送消息
-
+                i = 0;
+                j = 0;
+                beat=new int[]{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};//1s内有50个时间间隔,beat用来记录时间间隔内是否有心跳,有心跳值为1,没有为0
+                beatVola=new int[]{0,0,0,0,0,0,0,0,0,0};
             }
             //result
         }
