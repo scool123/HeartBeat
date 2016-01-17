@@ -160,8 +160,9 @@ public class MainActivity extends AppCompatActivity
             System.out.println("enter into print run");
             int i = 0;
             int j = 0;
-            int[] beat={0,0,0,0,0};//1s内有5个时间间隔,beat用来记录时间间隔内是否有心跳,有心跳值为1,没有为0
-            int beatVol=34;//阀值
+            int[] beat={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};//1s内有25个时间间隔,beat用来记录时间间隔内是否有心跳,有心跳值为1,没有为0
+            int[] beatVola={0,0,0,0,0,0,0,0,0,0};
+            int beatVol=220;//阀值
             int hartRate;
             isprinting =true;
             while (isprinting){
@@ -174,18 +175,19 @@ public class MainActivity extends AppCompatActivity
                 while(i<COUNT){
                     //Log.i("测试-", "分贝值:" + data.x[i]);
                     Log.d("print测试-" , "分贝值:" + data.x[i]);
-                    if(data.x[i]>beatVol) {//大于阀值时对应间隔的beat值为1
-                        beat[i / 10] = 1;
-                        Log.d("print测试-" , "is beat:" + beat[i/10]);
-                    }
-                    Log.d("print测试-" , "is beat:" + beat[i/10]);
+                    //if(data.x[i]>beatVol) {//大于阀值时对应间隔的beat值为1
+                        beat[i / 2] = beat[i / 2]+(int)data.x[i];
+                        Log.d("print测试-" , "is beat:" + beat[i/2]);
+                    //}
+                    Log.d("print测试-" , "is beat:" + beat[i/2]);
                     i++;
                 }
-                //间隔0.2秒即10个样本一个间隔判断其中数值与阈值的大小,大于阈值此0.2秒内有一个心跳,小于阈值此0.2s内没有心跳
+                //间隔0.1秒即5个样本一个间隔判断其中数值与阈值的大小,大于阈值此0.1秒内有一个心跳,小于阈值此0.2s内没有心跳
                 int count=0;
                 int gap;
-                while(j<5){
-                    if(beat[j]==1){
+                while(j<25){
+                    Log.d("print测试-" , "is beat:" + beat[j]);
+                    if(beat[j]>=90){
                         if(count==0){
                             gap=j;
                         }
@@ -193,7 +195,7 @@ public class MainActivity extends AppCompatActivity
                         count=j;
                         Log.d("测试-", "心率count:" + count);
                         if(gap>1){
-                            hartRate=300/(gap-1);
+                            hartRate=1500/(gap-1);
                             Log.d("测试-", "心率:" + hartRate);
         /*
          *2016/1/14 add TextView
