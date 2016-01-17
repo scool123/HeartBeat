@@ -24,6 +24,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
 //test github
+    static AudioRecord mAudioRecord;
 //    static Thread recordThread;
 //    static Thread recordThread;
 
@@ -33,6 +34,7 @@ public class MainActivity extends AppCompatActivity
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
+
     private static final String LOG_TAG = "AudioRecordTest";
     //语音文件保存路径
     static String FileName = null;
@@ -85,7 +87,7 @@ public class MainActivity extends AppCompatActivity
 
         static final int BUFFER_SIZE = AudioRecord.getMinBufferSize(SAMPLE_RATE_IN_HZ,
                 AudioFormat.CHANNEL_IN_DEFAULT, AudioFormat.ENCODING_PCM_16BIT);
-        AudioRecord mAudioRecord;
+
         boolean isGetVoiceRun;
         Object mLock;
 
@@ -160,7 +162,7 @@ public class MainActivity extends AppCompatActivity
             System.out.println("enter into print run");
             int i = 0;
             int j = 0;
-            int[] beat={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};//1s内有25个时间间隔,beat用来记录时间间隔内是否有心跳,有心跳值为1,没有为0
+            int[] beat={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};//1s内有50个时间间隔,beat用来记录时间间隔内是否有心跳,有心跳值为1,没有为0
             int[] beatVola={0,0,0,0,0,0,0,0,0,0};
             int beatVol=220;//阀值
             int hartRate;
@@ -172,48 +174,63 @@ public class MainActivity extends AppCompatActivity
                 }catch(InterruptedException e){
                     e.printStackTrace();
                 }
-                while(i<COUNT){
+                while(i<COUNT-1){
                     //Log.i("测试-", "分贝值:" + data.x[i]);
                     Log.d("print测试-" , "分贝值:" + data.x[i]);
                     //if(data.x[i]>beatVol) {//大于阀值时对应间隔的beat值为1
-                        beat[i / 2] = beat[i / 2]+(int)data.x[i];
-                        Log.d("print测试-" , "is beat:" + beat[i/2]);
+                        beat[i] = (int)data.x[i+1]+(int)data.x[i];
+                        Log.d("print测试-" , "is beat:" + beat[i]);
                     //}
-                    Log.d("print测试-" , "is beat:" + beat[i/2]);
+                    //Log.d("print测试-" , "is beat:" + beat[i]);
                     i++;
                 }
                 //间隔0.1秒即5个样本一个间隔判断其中数值与阈值的大小,大于阈值此0.1秒内有一个心跳,小于阈值此0.2s内没有心跳
                 int count=0;
                 int gap;
-                while(j<25){
-                    Log.d("print测试-" , "is beat:" + beat[j]);
-                    if(beat[j]>=90){
+                int[] hartrates={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};//记录心率值
+                int c=0;//计数有几次心率求出
+                while(j<50){
+                    Log.d("print测试---" ,"No."+j+ "is beat:" + beat[j]);
+                    if(beat[j]>=85){
                         if(count==0){
                             gap=j;
                         }
                         gap=j-count;
                         count=j;
-                        Log.d("测试-", "心率count:" + count);
-                        if(gap>1){
-                            hartRate=1500/(gap-1);
-                            Log.d("测试-", "心率:" + hartRate);
-        /*
-         *2016/1/14 add TextView
-         */
-                            String msg="心率:" + hartRate;
-                            Bundle bd=new Bundle();//创建Bundle对象
-                            bd.putString("msg", msg);//向Bundle添加数据
-                            Message message=new Message();//创建Message对象
-                            message.setData(bd);//向Message中添加数据
-                            message.what=0;
-                            handler.sendMessage(message);//调用主控制类中的Handler对象发送消息
-
-                            
+                        Log.d("测试-", "No."+j+"心率count:" + count);
+                        if(gap>0){
+                            hartRate=1000/gap;
+                            Log.d("测试-", "No."+j+"心率:" + hartRate);
+                            //循环算出1s内的心率,存放在heartrates数组内
+                            hartrates[c++]=hartRate;
                             //Log.d("测试-" , "分贝值:" + data.x[i]);
                         }
                     }
+                    beat[j]=0;
                     j++;
                 }
+                /*计算一秒内心率平均值*/
+                hartRate=0;//1s内的平均心率
+                int t=0;//数有几个心率可用
+                c--;
+                for(;c>=1;c--)//第一个心率一般不准不加入计算
+                {
+                    if(hartrates[c]<260 && hartrates[c]>80)
+                    {
+                        hartRate+=hartrates[c];
+                        t++;
+                    }
+                }
+                if(t>0)hartRate=hartRate/t;//平均值
+                else System.out.println("同步部分失败");
+                String msg="心率:" + hartRate;
+                Bundle bd=new Bundle();//创建Bundle对象
+                bd.putString("msg", msg);//向Bundle添加数据
+                Message message=new Message();//创建Message对象
+                message.setData(bd);//向Message中添加数据
+                message.what=0;
+                handler.sendMessage(message);//调用主控制类中的Handler对象发送消息
+
             }
             //result
         }
@@ -255,9 +272,9 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onClick(View v) {
             // TODO Auto-generated method stub
-            /*mRecorder.stop();
-            mRecorder.release();
-            mRecorder = null;*/
+            mAudioRecord.stop();
+            mAudioRecord.release();
+            mAudioRecord = null;
         }
 
     }
