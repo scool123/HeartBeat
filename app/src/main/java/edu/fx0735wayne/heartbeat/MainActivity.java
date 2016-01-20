@@ -1,6 +1,7 @@
 package edu.fx0735wayne.heartbeat;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
@@ -19,6 +20,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -422,6 +432,58 @@ public class MainActivity extends AppCompatActivity
             Button startPlay;
             Button stopRecord;
             Button stopPlay;
+            // a LineChart is initialized from xml
+            LineChart chart = (LineChart)rootView.findViewById(R.id.chart);
+            chart.invalidate();// Calling this method on the chart will redraw (refresh) it.
+            chart.setLogEnabled(false);
+            chart.setBackgroundColor(Color.parseColor("#fffff0"));
+            chart.setDrawGridBackground(true);
+            chart.setGridBackgroundColor(Color.parseColor("#fffff0"));
+            chart.setTouchEnabled(true);
+            chart.setDragEnabled(true);
+            chart.setScaleXEnabled(true);
+            chart.setDragDecelerationFrictionCoef(0.5f);
+            chart.setDescription("HeartRate/min");
+            //axis-y
+            YAxis leftAxis = chart.getAxisLeft();
+            leftAxis.setEnabled(true);
+            leftAxis.setDrawGridLines(true);
+            leftAxis.setTextColor(Color.parseColor("#00ccff"));
+            leftAxis.setGridColor(Color.parseColor("#ff9900"));
+            leftAxis.setAxisLineColor(Color.parseColor("#ffff00"));
+            leftAxis.setAxisLineWidth(4f);
+            leftAxis.setGridLineWidth(0.5f);
+            leftAxis.setTextSize(10f);
+            leftAxis.setLabelCount(22, false);
+            leftAxis.setStartAtZero(false);
+            leftAxis.setAxisMaxValue(220f);
+            leftAxis.setAxisMinValue(0f);
+            //axis-x
+            XAxis xAxis = chart.getXAxis();
+            xAxis.setEnabled(true);
+            xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+            //xAxis.setLabelsToSkip(59);
+            xAxis.setTextSize(10f);
+            xAxis.setAxisLineWidth(4f);
+            xAxis.setTextColor(Color.parseColor("#00ccff"));
+            xAxis.setDrawAxisLine(true);
+            xAxis.setDrawGridLines(true);
+            xAxis.setGridLineWidth(0.5f);
+            xAxis.setGridColor(Color.parseColor("#ff9900"));
+            xAxis.setAxisLineColor(Color.parseColor("#ffff00"));
+            //data
+            Entry hr1 = new Entry(1, 0);
+            ArrayList<Entry> heartrate1 = new ArrayList<Entry>();
+            LineDataSet setHeart1 = new LineDataSet(heartrate1, "heart rate");
+            ArrayList<LineDataSet> dataSets = new ArrayList<LineDataSet>();
+            dataSets.add(setHeart1);
+            ArrayList<String> xVals = new ArrayList<String>();
+            xVals.add("1.Q");
+            LineData data = new LineData(xVals, dataSets);
+            chart.setData(data);
+            chart.invalidate(); // refresh
+
+
              /* 开始录音 */
             startRecord = (Button)rootView.findViewById(R.id.startRecord);
             startRecord.setText("Start Record");
