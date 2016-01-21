@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -28,7 +29,9 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -57,7 +60,8 @@ public class MainActivity extends AppCompatActivity
     static TextView result;
     static Handler handler;
 
-
+    public static LineChart chart;
+    public static LineDataSet setHeart1;
     private static boolean isprinting;
     private static final int COUNT = 50;
     public static Data data;
@@ -89,7 +93,7 @@ public class MainActivity extends AppCompatActivity
         p.start();
 
     }
-
+    static boolean isGetVoiceRun;
     //实时输出分贝值
     static class MyAudioRecorder  implements View.OnClickListener {
         static final String TAG = "AudioRecord";
@@ -98,7 +102,7 @@ public class MainActivity extends AppCompatActivity
         static final int BUFFER_SIZE = AudioRecord.getMinBufferSize(SAMPLE_RATE_IN_HZ,
                 AudioFormat.CHANNEL_IN_DEFAULT, AudioFormat.ENCODING_PCM_16BIT);
 
-        boolean isGetVoiceRun;
+        //boolean isGetVoiceRun;
         Object mLock;
 
         public MyAudioRecorder() {
@@ -110,7 +114,8 @@ public class MainActivity extends AppCompatActivity
         public void onClick(View v) {
             Log.i(TAG, "进入onClick方法");
             if (isGetVoiceRun) {
-                Log.e(TAG, "还在录着呢");
+                Toast.makeText(v.getContext(), "still recording",
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
             mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC,
@@ -120,6 +125,7 @@ public class MainActivity extends AppCompatActivity
                 Log.e("sound", "mAudioRecord初始化失败");
             }
             isGetVoiceRun = true;
+            isprinting=true;
 
             /*recordThread = */new Thread(new Runnable() {
                 @Override
@@ -157,9 +163,9 @@ public class MainActivity extends AppCompatActivity
                             }
                         }
                     }
-                    mAudioRecord.stop();
-                    mAudioRecord.release();
-                    mAudioRecord = null;
+                    //mAudioRecord.stop();
+                    //mAudioRecord.release();
+                    //mAudioRecord = null;
                 }
             }).start();
         }
@@ -284,38 +290,61 @@ public class MainActivity extends AppCompatActivity
 
         @Override
         public void onClick(View v) {
-            // TODO Auto-generated method stub
+            // TODO Auto-generated method stu
+            if(isGetVoiceRun==false)
+            {
+                Toast.makeText(v.getContext(), "already stop record",
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+            isprinting=false;
+            isGetVoiceRun=false;
             mAudioRecord.stop();
             mAudioRecord.release();
             mAudioRecord = null;
         }
 
     }
-    //播放录音
-    static class startPlayListener implements View.OnClickListener {
+    //reset
+    static class resetChartListener implements View.OnClickListener {
 
         @Override
         public void onClick(View v) {
             // TODO Auto-generated method stub
-            /*mPlayer = new MediaPlayer();
-            try{
-                mPlayer.setDataSource(FileName);
-                mPlayer.prepare();
-                mPlayer.start();
-            }catch(IOException e){
-                Log.e(LOG_TAG,"播放失败");
-            }*/
+            if(isGetVoiceRun==true)
+            {
+                Toast.makeText(v.getContext(), "Please stop record first",
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if(isGetVoiceRun==false)
+            {
+                setHeart1.clear();
+                chart.invalidate();
+            }
+
         }
 
     }
-    //停止播放录音
-    static class stopPlayListener implements View.OnClickListener {
+    //保存图片
+    static class saveChartListener implements View.OnClickListener {
 
         @Override
         public void onClick(View v) {
             // TODO Auto-generated method stub
-            /*mPlayer.release();
-            mPlayer = null;*/
+
+            if(isGetVoiceRun==true)
+            {
+                Toast.makeText(v.getContext(), "Please stop record first",
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+            SimpleDateFormat sDateFormat    =   new    SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+            String    date    =    sDateFormat.format(Calendar.getInstance().getTime());
+            chart.saveToGallery(date,100);
+            Toast.makeText(v.getContext(), "Chart has been save as:"+date+".jpeg",
+                    Toast.LENGTH_SHORT).show();
+            //System.out.println("save image:"+date);
         }
 
     }
@@ -433,7 +462,7 @@ public class MainActivity extends AppCompatActivity
             Button stopRecord;
             Button stopPlay;
             // a LineChart is initialized from xml
-            final LineChart chart = (LineChart)rootView.findViewById(R.id.chart);
+            chart = (LineChart)rootView.findViewById(R.id.chart);
             chart.invalidate();// Calling this method on the chart will redraw (refresh) it.
             chart.setLogEnabled(false);
             chart.setBackgroundColor(Color.parseColor("#fffff0"));
@@ -477,7 +506,7 @@ public class MainActivity extends AppCompatActivity
             //data
             Entry hr1 = new Entry(1, 0);
             final ArrayList<Entry> heartrate1 = new ArrayList<Entry>();
-            final LineDataSet setHeart1 = new LineDataSet(heartrate1, "heart rate");
+            setHeart1 = new LineDataSet(heartrate1, "heart rate");
             ArrayList<LineDataSet> dataSets = new ArrayList<LineDataSet>();
             dataSets.add(setHeart1);
             ArrayList<String> xVals = new ArrayList<String>();
@@ -528,14 +557,14 @@ public class MainActivity extends AppCompatActivity
 
             //开始播放
             startPlay = (Button)rootView.findViewById(R.id.startPlay);
-            startPlay.setText("Start Play");
+            startPlay.setText("Reset Chart");
             //绑定监听器
-            startPlay.setOnClickListener(new startPlayListener());
+            startPlay.setOnClickListener(new resetChartListener());
 
             //结束播放
             stopPlay = (Button)rootView.findViewById(R.id.stopPlay);
-            stopPlay.setText("Stop Play");
-            stopPlay.setOnClickListener(new stopPlayListener());
+            stopPlay.setText("Save as Image in Gallery");
+            stopPlay.setOnClickListener(new saveChartListener());
 
             //设置sdcard的路径
             FileName = Environment.getExternalStorageDirectory().getAbsolutePath();
