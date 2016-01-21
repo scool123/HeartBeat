@@ -494,7 +494,7 @@ public class MainActivity extends AppCompatActivity
             XAxis xAxis = chart.getXAxis();
             xAxis.setEnabled(true);
             xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-            xAxis.setLabelsToSkip(2               );
+            xAxis.setLabelsToSkip(9);
             xAxis.setTextSize(10f);
             xAxis.setAxisLineWidth(4f);
             xAxis.setTextColor(Color.parseColor("#00ccff"));
