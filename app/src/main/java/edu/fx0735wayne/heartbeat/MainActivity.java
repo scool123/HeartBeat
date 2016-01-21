@@ -138,7 +138,7 @@ public class MainActivity extends AppCompatActivity
                         // 平方和除以数据总长度，得到音量大小。
                         double mean = v / (double) r;
                         double volume = 10 * Math.log10(mean);
-                        Log.d(TAG, "thread分贝值:" + volume);
+                        //Log.d(TAG, "thread分贝值:" + volume);
                         res[j] = volume;
                         j++;
                         if(j>=COUNT){
@@ -186,10 +186,10 @@ public class MainActivity extends AppCompatActivity
                 }
                 while(i<COUNT-1){
                     //Log.i("测试-", "分贝值:" + data.x[i]);
-                    Log.d("print测试-" , "分贝值:" + data.x[i]);
+                    //Log.d("print测试-" , "分贝值:" + data.x[i]);
                     //if(data.x[i]>beatVol) {//大于阀值时对应间隔的beat值为1
                         beat[i] = (int)data.x[i+1]+(int)data.x[i];
-                        Log.d("print测试-" , "is beat:" + beat[i]);
+                        //Log.d("print测试-" , "is beat:" + beat[i]);
                     //}
                     //Log.d("print测试-" , "is beat:" + beat[i]);
                     i++;
@@ -200,17 +200,17 @@ public class MainActivity extends AppCompatActivity
                 int[] hartrates={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};//记录心率值
                 int c=0;//计数有几次心率求出
                 while(j<50){
-                    Log.d("print测试---" ,"No."+j+ "is beat:" + beat[j]);
+                    //Log.d("print测试---" ,"No."+j+ "is beat:" + beat[j]);
                     if(beat[j]>=85){
                         if(count==0){
                             gap=j;
                         }
                         gap=j-count;
                         count=j;
-                        Log.d("测试-", "No."+j+"心率count:" + count);
+                        //Log.d("测试-", "No."+j+"心率count:" + count);
                         if(gap>0){
                             hartRate=1000/gap;
-                            Log.d("测试-", "No."+j+"心率:" + hartRate);
+                            //Log.d("测试-", "No."+j+"心率:" + hartRate);
                             //循环算出1s内的心率,存放在heartrates数组内
                             hartrates[c++]=hartRate;
                             //Log.d("测试-" , "分贝值:" + data.x[i]);
@@ -233,7 +233,7 @@ public class MainActivity extends AppCompatActivity
                 }
                 if(t>0)hartRate=hartRate/t;//平均值
                 else System.out.println("同步部分失败");
-                String msg="心率:" + hartRate;
+                String msg= String.valueOf(hartRate);
                 Bundle bd=new Bundle();//创建Bundle对象
                 bd.putString("msg", msg);//向Bundle添加数据
                 Message message=new Message();//创建Message对象
@@ -416,7 +416,7 @@ public class MainActivity extends AppCompatActivity
          */
         result = (TextView)rootView.findViewById(R.id.resultView);
         result.setText("On starting...");
-        handler= new Handler(){
+        /*handler= new Handler(){
             public void handleMessage(Message msg) {
                 switch(msg.what){
                     case 0:
@@ -427,22 +427,25 @@ public class MainActivity extends AppCompatActivity
                         break;
                 }
             }
-        };
+        };*/
             Button startRecord;
             Button startPlay;
             Button stopRecord;
             Button stopPlay;
             // a LineChart is initialized from xml
-            LineChart chart = (LineChart)rootView.findViewById(R.id.chart);
+            final LineChart chart = (LineChart)rootView.findViewById(R.id.chart);
             chart.invalidate();// Calling this method on the chart will redraw (refresh) it.
             chart.setLogEnabled(false);
             chart.setBackgroundColor(Color.parseColor("#fffff0"));
             chart.setDrawGridBackground(true);
             chart.setGridBackgroundColor(Color.parseColor("#fffff0"));
+            chart.setDrawGridBackground(true);
             chart.setTouchEnabled(true);
             chart.setDragEnabled(true);
             chart.setScaleXEnabled(true);
-            chart.setDragDecelerationFrictionCoef(0.5f);
+            chart.setDragDecelerationEnabled(true);
+            chart.setDragDecelerationFrictionCoef(0.2f);
+            chart.setAutoScaleMinMaxEnabled(false);
             chart.setDescription("HeartRate/min");
             //axis-y
             YAxis leftAxis = chart.getAxisLeft();
@@ -456,13 +459,13 @@ public class MainActivity extends AppCompatActivity
             leftAxis.setTextSize(10f);
             leftAxis.setLabelCount(22, false);
             leftAxis.setStartAtZero(false);
-            leftAxis.setAxisMaxValue(220f);
+            leftAxis.setAxisMaxValue(240f);
             leftAxis.setAxisMinValue(0f);
             //axis-x
             XAxis xAxis = chart.getXAxis();
             xAxis.setEnabled(true);
             xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-            //xAxis.setLabelsToSkip(59);
+            xAxis.setLabelsToSkip(2               );
             xAxis.setTextSize(10f);
             xAxis.setAxisLineWidth(4f);
             xAxis.setTextColor(Color.parseColor("#00ccff"));
@@ -473,15 +476,40 @@ public class MainActivity extends AppCompatActivity
             xAxis.setAxisLineColor(Color.parseColor("#ffff00"));
             //data
             Entry hr1 = new Entry(1, 0);
-            ArrayList<Entry> heartrate1 = new ArrayList<Entry>();
-            LineDataSet setHeart1 = new LineDataSet(heartrate1, "heart rate");
+            final ArrayList<Entry> heartrate1 = new ArrayList<Entry>();
+            final LineDataSet setHeart1 = new LineDataSet(heartrate1, "heart rate");
             ArrayList<LineDataSet> dataSets = new ArrayList<LineDataSet>();
             dataSets.add(setHeart1);
             ArrayList<String> xVals = new ArrayList<String>();
-            xVals.add("1.Q");
-            LineData data = new LineData(xVals, dataSets);
+            for(int i = 0;i<421;i++)
+            {
+                Integer integer = new Integer(i);
+                xVals.add(integer.toString());
+            }
+            final LineData data = new LineData(xVals, dataSets);
+            //setHeart1=data.getDataSetByIndex(0);
             chart.setData(data);
             chart.invalidate(); // refresh
+
+            //drawing heartrate line
+            handler= new Handler(){
+                public void handleMessage(Message msg) {
+                    int drawsecound=0;
+                    switch(msg.what){
+                        case 0:
+                            Bundle b = msg.getData();
+                            String str = b.getString("msg");//获取Bundle对象
+                            //Log.d("chart测试-", "心率:" + str);
+                            Entry hr2 = new Entry((float)Integer.valueOf(str).intValue(),drawsecound++);
+                            data.addEntry(new Entry((float) Integer.valueOf(str).intValue(), setHeart1.getEntryCount()*3), 0);
+                            chart.notifyDataSetChanged();
+                            chart.invalidate();
+                            //result.setText(str);
+                            break;
+                    }
+                }
+            };
+
 
 
              /* 开始录音 */
