@@ -1,7 +1,6 @@
 package edu.fx0735wayne.heartbeat;
 
 import android.app.Activity;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
@@ -29,18 +28,7 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Image;
-import com.itextpdf.text.PageSize;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.pdf.PdfWriter;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -78,11 +66,7 @@ public class MainActivity extends AppCompatActivity
     private static final int COUNT = 50;
     public static Data data;
     public static double[] res = new double[COUNT];
-    static int initRate=0;
-    static int FormerRate=0;
-    static int threeCount;
-    static int writepdf=0;
-    static Document doc1 = new Document();
+
 
     /*//语音操作对象
     static private MediaPlayer mPlayer = null;
@@ -112,7 +96,6 @@ public class MainActivity extends AppCompatActivity
     static boolean isGetVoiceRun;
     //实时输出分贝值
     static class MyAudioRecorder  implements View.OnClickListener {
-
         static final String TAG = "AudioRecord";
         static final int SAMPLE_RATE_IN_HZ = 8000;
 
@@ -143,7 +126,7 @@ public class MainActivity extends AppCompatActivity
             }
             isGetVoiceRun = true;
             isprinting=true;
-            writepdf=1;
+
             /*recordThread = */new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -161,7 +144,7 @@ public class MainActivity extends AppCompatActivity
                         // 平方和除以数据总长度，得到音量大小。
                         double mean = v / (double) r;
                         double volume = 10 * Math.log10(mean);
-                        Log.d(TAG, "thread分贝值:" + volume);
+                        //Log.d(TAG, "thread分贝值:" + volume);
                         res[j] = volume;
                         j++;
                         if(j>=COUNT){
@@ -190,10 +173,8 @@ public class MainActivity extends AppCompatActivity
 
     //实时展示数据线程类
     static public class Print extends Thread{
-
         @Override
         public void run(){
-
             System.out.println("enter into print run");
             int i = 0;
             int j = 0;
@@ -210,7 +191,7 @@ public class MainActivity extends AppCompatActivity
                     e.printStackTrace();
                 }
                 while(i<COUNT-1){
-                    Log.i("测试-", "分贝值:" + data.x[i]);
+                    //Log.i("测试-", "分贝值:" + data.x[i]);
                     //Log.d("print测试-" , "分贝值:" + data.x[i]);
                     //if(data.x[i]>beatVol) {//大于阀值时对应间隔的beat值为1
                         beat[i] = (int)data.x[i+1]+(int)data.x[i];
@@ -222,11 +203,11 @@ public class MainActivity extends AppCompatActivity
                 //间隔0.1秒即5个样本一个间隔判断其中数值与阈值的大小,大于阈值此0.1秒内有一个心跳,小于阈值此0.2s内没有心跳
                 int count=0;
                 int gap;
-                int[] hartrates={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};//记录心率值
+                int[] hartrates={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};//记录心率值
                 int c=0;//计数有几次心率求出
                 while(j<50){
                     //Log.d("print测试---" ,"No."+j+ "is beat:" + beat[j]);
-                    if(beat[j]>=75){
+                    if(beat[j]>=85){
                         if(count==0){
                             gap=j;
                         }
@@ -235,10 +216,10 @@ public class MainActivity extends AppCompatActivity
                         //Log.d("测试-", "No."+j+"心率count:" + count);
                         if(gap>0){
                             hartRate=1000/gap;
-                            Log.d("测试-", "No."+j+"心率:" + hartRate);
+                            //Log.d("测试-", "No."+j+"心率:" + hartRate);
                             //循环算出1s内的心率,存放在heartrates数组内
                             hartrates[c++]=hartRate;
-                            Log.d("测试-" , "分贝值:" + data.x[i]);
+                            //Log.d("测试-" , "分贝值:" + data.x[i]);
                         }
                     }
                     beat[j]=0;
@@ -256,29 +237,8 @@ public class MainActivity extends AppCompatActivity
                         t++;
                     }
                 }
-
-
-                if(t>0)
-                {
-                    hartRate=hartRate/t;
-                    if((hartRate-FormerRate)>10&&initRate==1) {
-                        hartRate=FormerRate+10;
-                        FormerRate = hartRate;
-                    }
-                    else if((FormerRate-hartRate)>10&&initRate==1){
-                        hartRate=FormerRate-10;
-                        FormerRate = hartRate;
-                    }
-                    else
-                    {
-                        FormerRate = hartRate;
-                        initRate=1;
-                    }
-
-                }//平均值*/
-                //if(t>0)hartRate=hartRate/t;
-                //else if(t>0)hartRate=FormerRate;
-                else{hartRate=FormerRate; System.out.println("同步部分失败");}
+                if(t>0)hartRate=hartRate/t;//平均值
+                else System.out.println("同步部分失败");
                 String msg= String.valueOf(hartRate);
                 Bundle bd=new Bundle();//创建Bundle对象
                 bd.putString("msg", msg);//向Bundle添加数据
@@ -342,7 +302,6 @@ public class MainActivity extends AppCompatActivity
             mAudioRecord.stop();
             mAudioRecord.release();
             mAudioRecord = null;
-            doc1.close();
         }
 
     }
@@ -362,7 +321,6 @@ public class MainActivity extends AppCompatActivity
             {
                 setHeart1.clear();
                 chart.invalidate();
-                doc1.close();
             }
 
         }
@@ -383,8 +341,8 @@ public class MainActivity extends AppCompatActivity
             }
             SimpleDateFormat sDateFormat    =   new    SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
             String    date    =    sDateFormat.format(Calendar.getInstance().getTime());
-            chart.saveToGallery(date+"t.jpg",100);
-            Toast.makeText(v.getContext(), "Chart has been save as:"+date+"test.jpg",
+            chart.saveToGallery(date,100);
+            Toast.makeText(v.getContext(), "Chart has been save as:"+date+".jpeg",
                     Toast.LENGTH_SHORT).show();
             //System.out.println("save image:"+date);
         }
@@ -511,13 +469,9 @@ public class MainActivity extends AppCompatActivity
             chart.setDrawGridBackground(true);
             chart.setGridBackgroundColor(Color.parseColor("#fffff0"));
             chart.setDrawGridBackground(true);
-            chart.setVisibleXRange((float)0,(float)420);
             chart.setTouchEnabled(true);
             chart.setDragEnabled(true);
-            chart.setScaleXEnabled(false);
-            chart.setScaleYEnabled(false);
-            chart.zoom((float)9,1,0,0);
-
+            chart.setScaleXEnabled(true);
             chart.setDragDecelerationEnabled(true);
             chart.setDragDecelerationFrictionCoef(0.2f);
             chart.setAutoScaleMinMaxEnabled(false);
@@ -540,8 +494,8 @@ public class MainActivity extends AppCompatActivity
             XAxis xAxis = chart.getXAxis();
             xAxis.setEnabled(true);
             xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-            xAxis.setLabelsToSkip(4);
-            xAxis.setTextSize(8f);
+            xAxis.setLabelsToSkip(2               );
+            xAxis.setTextSize(10f);
             xAxis.setAxisLineWidth(4f);
             xAxis.setTextColor(Color.parseColor("#00ccff"));
             xAxis.setDrawAxisLine(true);
@@ -555,8 +509,8 @@ public class MainActivity extends AppCompatActivity
             setHeart1 = new LineDataSet(heartrate1, "heart rate");
             ArrayList<LineDataSet> dataSets = new ArrayList<LineDataSet>();
             dataSets.add(setHeart1);
-            final ArrayList<String> xVals = new ArrayList<String>();
-            for(int i = 0;i<1261;i++)
+            ArrayList<String> xVals = new ArrayList<String>();
+            for(int i = 0;i<421;i++)
             {
                 Integer integer = new Integer(i);
                 xVals.add(integer.toString());
@@ -566,94 +520,19 @@ public class MainActivity extends AppCompatActivity
             chart.setData(data);
             chart.invalidate(); // refresh
 
-            threeCount=1;
-
-
-                System.out.println("-------------before pdf wrote f-----------");
-
-                try {
-                    SimpleDateFormat sDateFormat    =   new    SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-                    String    date    =    sDateFormat.format(Calendar.getInstance().getTime());
-                    PdfWriter.getInstance(doc1, new FileOutputStream(Environment.getExternalStorageDirectory().getAbsolutePath() + "/DCIM/" +date+
-                            "tresult.pdf"));
-                    doc1.setPageSize(PageSize.A4);
-                    System.out.println("-------------before open doc--------------");
-                    doc1.open();
-                    doc1.add(new Paragraph("TEST"));
-                } catch (DocumentException e) {
-                    e.printStackTrace();
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-
             //drawing heartrate line
             handler= new Handler(){
-                int chartnumber=0;
                 public void handleMessage(Message msg) {
                     int drawsecound=0;
-
                     switch(msg.what){
                         case 0:
                             Bundle b = msg.getData();
                             String str = b.getString("msg");//获取Bundle对象
                             //Log.d("chart测试-", "心率:" + str);
                             Entry hr2 = new Entry((float)Integer.valueOf(str).intValue(),drawsecound++);
-                            data.addEntry(new Entry((float) Integer.valueOf(str).intValue(), setHeart1.getEntryCount() * 3), 0);
+                            data.addEntry(new Entry((float) Integer.valueOf(str).intValue(), setHeart1.getEntryCount()*3), 0);
                             chart.notifyDataSetChanged();
                             chart.invalidate();
-                            System.out.println("-------------before if 20-----------"+"No."+setHeart1.getEntryCount());
-                            if(setHeart1.getEntryCount()%2==0)
-                            {
-                                chartnumber++;
-                                System.out.println("-------------before try -----------");
-                                try {
-
-
-                                    System.out.println("-------------before open stream-----------");
-                                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                                    System.out.println("-------------before open bitmap-----------");
-                                    Bitmap b1=chart.getChartBitmap();
-                                    b1.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                                    Image jpg = Image.getInstance(stream.toByteArray());
-                                    jpg.setAlignment(Image.MIDDLE);
-                                    float per= (float) 0.5;
-                                    jpg.setAbsolutePosition(5 + 190 * ((chartnumber-1)%3), 630 - (threeCount - 1) * 200);
-                                    jpg.scaleAbsolute(200, 150);
-                                    System.out.println("-------------before add the pfd-----------");
-                                    //Paragraph p =new Paragraph("No." + threeCount+ "seven minutes");
-                                    doc1.add(jpg);
-                                    chart.moveViewToX((float)140*chartnumber);
-                                    //chart.setDragOffsetX((float)(-560*chartnumber));
-                                    System.out.println("-------------before clear-----------------");
-
-                                    if(chartnumber%3==0)
-                                    {
-
-                                        if(threeCount==3){
-                                            System.out.println("#################before clear##################");
-                                            doc1.close();
-                                        }
-                                        //chartnumber=0;
-                                        threeCount++;
-                                        //chart.moveViewToX((float) 0);
-
-
-                                        break;
-                                    }
-
-                                } catch (DocumentException e) {
-                                    e.printStackTrace();
-                                } catch (FileNotFoundException e) {
-                                    e.printStackTrace();
-                                } catch (MalformedURLException e) {
-                                    e.printStackTrace();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-
-
-                            }
-
                             //result.setText(str);
                             break;
                     }
