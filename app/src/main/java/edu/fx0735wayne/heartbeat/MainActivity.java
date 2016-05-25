@@ -24,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
@@ -506,6 +507,7 @@ public class MainActivity extends AppCompatActivity
             chart = (LineChart)rootView.findViewById(R.id.chart);
             chart.invalidate();// Calling this method on the chart will redraw (refresh) it.
             chart.setLogEnabled(false);
+
             chart.setBackgroundColor(Color.parseColor("#fffff0"));
             chart.setDrawGridBackground(true);
             chart.setGridBackgroundColor(Color.parseColor("#fffff0"));
@@ -516,15 +518,18 @@ public class MainActivity extends AppCompatActivity
             chart.setScaleXEnabled(false);
             chart.setScaleYEnabled(false);
             chart.zoom((float) 9, 1, 0, 0);
-
             chart.setDragDecelerationEnabled(true);
             chart.setDragDecelerationFrictionCoef(0.2f);
             chart.setAutoScaleMinMaxEnabled(false);
-            chart.setDescription("HeartRate/min");
+            chart.setDescription(".");
+            Legend mLegend = chart.getLegend();
+            mLegend.setEnabled(false);
+
             //axis-y
-            YAxis leftAxis = chart.getAxisLeft();
+            final YAxis leftAxis = chart.getAxisLeft();
             leftAxis.setEnabled(true);
             leftAxis.setDrawGridLines(true);
+            leftAxis.removeAllLimitLines();
             leftAxis.setTextColor(Color.parseColor("#00ccff"));
             leftAxis.setGridColor(Color.parseColor("#ff9900"));
             leftAxis.setAxisLineColor(Color.parseColor("#ffff00"));
@@ -535,10 +540,14 @@ public class MainActivity extends AppCompatActivity
             leftAxis.setStartAtZero(false);
             leftAxis.setAxisMaxValue(240f);
             leftAxis.setAxisMinValue(0f);
+            YAxis rightAxis = chart.getAxisRight();
+            rightAxis.removeAllLimitLines();
+            rightAxis.setEnabled(false);
             //axis-x
             XAxis xAxis = chart.getXAxis();
             xAxis.setEnabled(true);
             xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+            xAxis.removeAllLimitLines();
             xAxis.setLabelsToSkip(4);
             xAxis.setTextSize(8f);
             xAxis.setAxisLineWidth(4f);
@@ -548,6 +557,7 @@ public class MainActivity extends AppCompatActivity
             xAxis.setGridLineWidth(0.5f);
             xAxis.setGridColor(Color.parseColor("#ff9900"));
             xAxis.setAxisLineColor(Color.parseColor("#ffff00"));
+
             //data
             Entry hr1 = new Entry(1, 0);
             final ArrayList<Entry> heartrate1 = new ArrayList<Entry>();
@@ -560,6 +570,12 @@ public class MainActivity extends AppCompatActivity
                 Integer integer = new Integer(i);
                 xVals.add(integer.toString());
             }
+            setHeart1.setDrawCircles(false);
+            setHeart1.setDrawCubic(false);
+            setHeart1.setDrawHighlightIndicators(false);
+            setHeart1.setDrawHorizontalHighlightIndicator(false);
+            setHeart1.setDrawValues(false);
+
             final LineData data = new LineData(xVals, dataSets);
             //setHeart1=data.getDataSetByIndex(0);
             chart.setData(data);
@@ -603,6 +619,12 @@ public class MainActivity extends AppCompatActivity
                             System.out.println("-------------before if 20-----------" + "No." + setHeart1.getEntryCount());
                             if (setHeart1.getEntryCount() % 47 == 0) {
                                 chartnumber++;
+                                if (chartnumber % 3 != 1 || chartnumber % 3 != 2)
+                                    leftAxis.setEnabled(false);
+                                else
+                                    leftAxis.setEnabled(true);
+                                chart.notifyDataSetChanged();
+                                chart.invalidate();
                                 System.out.println("-------------before try -----------");
                                 try {
 
