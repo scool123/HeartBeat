@@ -24,4 +24,5 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.0.0'
     compile files('libs/mpandroidchartlibrary-2-1-6.jar')
     compile files('libs/iTextpdf.jar')
+    //compile 'com.github.PhilJay:MPAndroidChart:v2.2.5'
 }

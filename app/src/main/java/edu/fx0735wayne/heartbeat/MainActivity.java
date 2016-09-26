@@ -575,7 +575,7 @@ public class MainActivity extends AppCompatActivity
             setHeart1.setDrawHighlightIndicators(false);
             setHeart1.setDrawHorizontalHighlightIndicator(false);
             setHeart1.setDrawValues(false);
-
+            
             final LineData data = new LineData(xVals, dataSets);
             //setHeart1=data.getDataSetByIndex(0);
             chart.setData(data);
