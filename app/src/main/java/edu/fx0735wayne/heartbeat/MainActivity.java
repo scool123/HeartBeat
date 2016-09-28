@@ -528,6 +528,7 @@ public class MainActivity extends AppCompatActivity
             //axis-y
             final YAxis leftAxis = chart.getAxisLeft();
             leftAxis.setEnabled(true);
+            leftAxis.setDrawLimitLinesBehindData(false);
             leftAxis.setDrawGridLines(true);
             leftAxis.removeAllLimitLines();
             leftAxis.setTextColor(Color.parseColor("#00ccff"));
@@ -575,6 +576,8 @@ public class MainActivity extends AppCompatActivity
             setHeart1.setDrawHighlightIndicators(false);
             setHeart1.setDrawHorizontalHighlightIndicator(false);
             setHeart1.setDrawValues(false);
+            setHeart1.setColor(Color.parseColor("#000000"));
+            setHeart1.setLineWidth((float) 0.5);
             
             final LineData data = new LineData(xVals, dataSets);
             //setHeart1=data.getDataSetByIndex(0);
@@ -619,10 +622,12 @@ public class MainActivity extends AppCompatActivity
                             System.out.println("-------------before if 20-----------" + "No." + setHeart1.getEntryCount());
                             if (setHeart1.getEntryCount() % 47 == 0) {
                                 chartnumber++;
-                                if (chartnumber % 3 != 1 || chartnumber % 3 != 2)
-                                    leftAxis.setEnabled(false);
+                                if (chartnumber % 3 != 0 && chartnumber % 3 != 2) {
+                                    leftAxis.setDrawLabels(true);
+                                }
+
                                 else
-                                    leftAxis.setEnabled(true);
+                                    leftAxis.setDrawLabels(false);
                                 chart.notifyDataSetChanged();
                                 chart.invalidate();
                                 System.out.println("-------------before try -----------");
@@ -642,7 +647,7 @@ public class MainActivity extends AppCompatActivity
                                     System.out.println("-------------before add the pfd-----------");
                                     //Paragraph p =new Paragraph("No." + threeCount+ "seven minutes");
                                     doc1.add(jpg);
-                                    chart.moveViewToX((float) 140 * chartnumber);
+                                    chart.moveViewToX(140 * chartnumber);
                                     //chart.setDragOffsetX((float)(-560*chartnumber));
                                     System.out.println("-------------before clear-----------------");
 
